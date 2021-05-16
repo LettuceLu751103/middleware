@@ -7,36 +7,25 @@ const PORT = 3000
 
 const fs = require('fs')
 
+const reqTime = Date.now()
+let saveData = ''
 app.use('/', (req, res, next) => {
-  console.log(req.url)
-  console.log(req.method)
   const date = new Date()
-
-
+  const reqTime = Date.now()
   const currentTime = getFormatTime(date)
-  const saveData = `${currentTime} | ${req.method} from ${req.url}`
-  console.log(currentTime)
-  fs.appendFile('./server.log', saveData + '\n', 'utf8', (err, data) => {
-    if (err) throw err
-    console.log('The file has been saved!')
-  });
-
-  // fs.readFile('./server.log', 'utf-8', (err, data) => {
-  //   if (err) throw err;
-  //   console.log(data);
-  // });
-  console.log('===================  before / GET  ===================')
-
+  saveData = `${currentTime} | ${req.method} from ${req.url}`
   next()
 })
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  const resTime = Date.now()
+  await fs.appendFile('./server.log', `${saveData} | total time: ${(resTime - reqTime) / 1000}ms` + '\n', 'utf8', (err, data) => {
+    if (err) throw err
+    console.log('The file saved by req /')
+  });
   res.end('GET /')
 })
 
-app.use((req, res, next) => {
-  console.log(currentTime)
-})
 
 app.listen(PORT, () => {
   console.log(`Server is Running at http://localhost:${PORT}`)
